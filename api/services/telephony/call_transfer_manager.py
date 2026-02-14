@@ -19,8 +19,8 @@ from api.services.telephony.transfer_event_protocol import (
 )
 
 
-class TransferCoordinator:
-    """Coordinates transfer events and context storage using Redis."""
+class CallTransferManager:
+    """Manages call transfer events and context storage using Redis."""
     
     def __init__(self, redis_client: Optional[aioredis.Redis] = None):
         self._redis_client = redis_client
@@ -155,7 +155,6 @@ class TransferCoordinator:
             timeout_event = TransferEvent(
                 type=TransferEventType.TRANSFER_TIMEOUT,
                 tool_call_id=tool_call_id,
-                workflow_run_id=0,  # Will be updated by caller
                 original_call_sid="",
                 status="failed",
                 reason="timeout",
@@ -192,13 +191,13 @@ class TransferCoordinator:
             logger.error(f"Error during transfer coordinator cleanup: {e}")
 
 
-# Global transfer coordinator instance
-_transfer_coordinator: Optional[TransferCoordinator] = None
+# Global call transfer manager instance
+_call_transfer_manager: Optional[CallTransferManager] = None
 
 
-async def get_transfer_coordinator() -> TransferCoordinator:
-    """Get or create the global transfer coordinator instance."""
-    global _transfer_coordinator
-    if not _transfer_coordinator:
-        _transfer_coordinator = TransferCoordinator()
-    return _transfer_coordinator
+async def get_call_transfer_manager() -> CallTransferManager:
+    """Get or create the global call transfer manager instance."""
+    global _call_transfer_manager
+    if not _call_transfer_manager:
+        _call_transfer_manager = CallTransferManager()
+    return _call_transfer_manager
